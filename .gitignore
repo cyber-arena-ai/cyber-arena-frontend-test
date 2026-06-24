@@ -1,0 +1,6 @@
+# Source game logs — large, read-only inputs we extract from (not part of the app)
+cyberarena_trajectories_14_enc/
+
+# OS cruft
+.DS_Store
+**/.DS_Store

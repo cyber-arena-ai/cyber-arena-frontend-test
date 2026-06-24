@@ -1,0 +1,12 @@
+{
+  "note": "Single source of truth for agent-harness identity: color, names, org, and which models each harness runs. Pages resolve a model -> harness for consistent coloring and labels.",
+  "harnesses": [
+    { "id": "claude-code",  "shortName": "CC", "fullName": "Claude Code",  "org": "Anthropic", "color": "#2540FF", "cli": "claude -p",   "models": ["claude-opus-4-8", "claude-sonnet-4-6"] },
+    { "id": "openai-codex", "shortName": "CX", "fullName": "OpenAI Codex", "org": "OpenAI",    "color": "#FF3D7F", "cli": "codex exec",  "models": ["gpt-5.4", "gpt-5.3-codex"] },
+    { "id": "gemini-cli",   "shortName": "GM", "fullName": "Gemini CLI",   "org": "Google",    "color": "#0E9E6E", "cli": "gemini",      "models": ["gemini-3-pro"] },
+    { "id": "grok-cli",     "shortName": "GK", "fullName": "Grok CLI",     "org": "xAI",       "color": "#6B2BD9", "cli": "grok",        "models": ["grok-4"] },
+    { "id": "deepseek-cli", "shortName": "DS", "fullName": "DeepSeek CLI", "org": "DeepSeek",  "color": "#1AA3C4", "cli": "deepseek",    "models": ["deepseek-v4"] },
+    { "id": "llama-cli",    "shortName": "LL", "fullName": "Llama CLI",    "org": "Meta",      "color": "#E8761A", "cli": "llama",       "models": ["llama-4-maverick"] }
+  ],
+  "fallback": { "shortName": "??", "fullName": "Unknown Harness", "org": "", "color": "#1A1A1A" }
+}
