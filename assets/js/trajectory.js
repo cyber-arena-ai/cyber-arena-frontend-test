@@ -4,7 +4,7 @@ import { loadJSON, loadHarnesses, fmtTime, esc, setActiveNav } from './util.js';
 setActiveNav('trajectory.html');
 
 const params = new URLSearchParams(location.search);
-const runId = params.get('run') || 'nautilus-ico';
+const runId = params.get('run') || 'btx';
 
 const [D, H] = await Promise.all([loadJSON(`data/trajectory-${runId}.json`), loadHarnesses()]);
 const t1 = D.teams.team1, t2 = D.teams.team2;
@@ -44,6 +44,24 @@ function side(team, key, cls){
 document.getElementById('board').innerHTML =
   side(t1,'team1','t1') + `<div class="mid">vs</div>` + side(t2,'team2','t2');
 
+/* ---- per-team time budget (thinking / tool exec / idle+untracked) ---- */
+const M = D.metrics, mhost = document.getElementById('metrics');
+if(mhost && M){
+  const fmt = s => `${Math.floor(s/60)}:${String(Math.round(s)%60).padStart(2,'0')}`;
+  const mrow = (key, team) => {
+    const m = M[key]; if(!m) return '';
+    const w = m.wall_s || 1;
+    const seg = (cls,v,lbl) => v>0
+      ? `<span class="mseg ${cls}" style="width:${100*v/w}%" title="${lbl} ${fmt(v)}">${100*v/w>=9?lbl:''}</span>` : '';
+    return `<div class="mrow"><div class="mlbl" style="color:${HH[key].color}">${team.label}</div>`
+      + `<div class="mbar">${seg('mt-think',m.think_s,'think')}${seg('mt-tool',m.tool_s,'tool')}${seg('mt-un',m.untrack_s,'idle')}</div>`
+      + `<div class="mnum">🧠 ${fmt(m.think_s)}${m.overlap?'*':''} · ⚙ ${fmt(m.tool_s)} · ⏸ ${fmt(m.untrack_s)} · ${m.out_tok.toLocaleString()} tok @ ${m.tok_per_s} tok/s</div></div>`;
+  };
+  mhost.innerHTML = `<div class="mhead">Time budget · <b class="mt-think-t">thinking</b> / <b class="mt-tool-t">tool exec</b> / <b class="mt-un-t">idle+untracked</b>`
+    + `<span class="msub">thinking = Σ model-inference latency · tool = Σ tool exec · wall = game duration${Object.values(M).some(m=>m.overlap)?' · *concurrent API calls overlap wall':''}</span></div>`
+    + mrow('team1',t1) + mrow('team2',t2);
+}
+
 /* ---- chat thread ---- */
 function actChip(a){
   const lbl = a.k==='bash' ? '$ shell' : a.k==='mcp' ? '⚙ cyberarena tool' : '⌕ web search';
@@ -68,10 +86,10 @@ function sysMsg(e){
       return `<div class="sys dup" data-kind="event" data-mm-type="dup" data-mm-team="${e.by}">${who} re-submitted a stolen flag — duplicate, no points · ${fmtTime(e.t)}</div>`;
     return `<div class="sys steal ${e.by}" data-kind="event" data-mm-type="capture" data-mm-team="${e.by}"
               title="${fmtTime(e.t)} — ${who} captured ${victim}'s flag">
-              <b>⚑ ${who}</b> captured <b>${victim}'s</b> flag<span class="tm">${fmtTime(e.t)} · +100</span></div>`;
+              <b>⚑ ${who}</b> captured <b>${victim}'s</b> flag<span class="tm">${fmtTime(e.t)} · +1 flag</span></div>`;
   }
   return `<div class="patchwrap" data-kind="event" data-mm-type="patch" data-mm-team="${e.by}" title="${fmtTime(e.t)} — ${who} patched">
-            <span class="sys patch">⟳ ${who} patched the service · ${fmtTime(e.t)} · +20</span></div>`;
+            <span class="sys patch">⟳ ${who} patched the service · ${fmtTime(e.t)}</span></div>`;
 }
 
 const rstarts = Object.entries(D.round_starts)
